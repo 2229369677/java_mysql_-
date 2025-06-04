@@ -20,7 +20,7 @@ public class SearchDialog extends JDialog {
     public SearchDialog(JFrame parent) {
         super(parent, "查找学生", true);
         this.studentService = new StudentService();
-        
+
         setSize(600, 400);
         setLocationRelativeTo(parent);
         initUI();
@@ -33,15 +33,15 @@ public class SearchDialog extends JDialog {
         // Search criteria panel
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         searchPanel.add(new JLabel("搜索类型:"));
-        
+
         String[] searchTypes = {"学号", "姓名", "专业"};
         searchTypeComboBox = new JComboBox<>(searchTypes);
         searchPanel.add(searchTypeComboBox);
-        
+
         searchPanel.add(new JLabel("搜索内容:"));
         searchField = new JTextField(20);
         searchPanel.add(searchField);
-        
+
         JButton searchButton = new JButton("搜索");
         searchButton.addActionListener(this::performSearch);
         searchPanel.add(searchButton);
@@ -86,7 +86,7 @@ public class SearchDialog extends JDialog {
 
     private void updateResultsTable(List<Student> students) {
         tableModel.setRowCount(0); // Clear table
-        
+
         if (students == null || students.isEmpty()) {
             JOptionPane.showMessageDialog(this, "未找到匹配的学生", "结果", JOptionPane.INFORMATION_MESSAGE);
             return;

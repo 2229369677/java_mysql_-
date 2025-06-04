@@ -99,7 +99,7 @@ public class DatabaseConnection {
             logger.info("数据库连接测试成功！");
             return true;
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "数据库连接测试失败", e);
+            logger.log(Level.SEVERE, "数据库连接测试失败: URL=" + URL + ", USERNAME=" + USERNAME, e);
             return false;
         }
     }

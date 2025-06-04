@@ -1,5 +1,7 @@
 package com.student.main;
 
+import com.student.gui.LoginDialog;
+import com.student.gui.MainFrame;
 import com.student.model.Student;
 import com.student.service.StudentService;
 import com.student.util.DatabaseConnection;
@@ -17,7 +19,7 @@ public class StudentManagementSystem {
     private StudentService studentService;
     private Scanner scanner;
     private DateTimeFormatter dateFormatter;
-    
+
     /**
      * 构造函数
      */
@@ -26,16 +28,24 @@ public class StudentManagementSystem {
         this.scanner = new Scanner(System.in);
         this.dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     }
-    
-    /**
-     * 主程序入口
-     * @param args 命令行参数
-     */
+
     public static void main(String[] args) {
-        // 启动图形用户界面
-        com.student.gui.MainFrame.main(args);
+        //gui
+        LoginDialog loginDialog = new LoginDialog(null);
+        loginDialog.setVisible(true);
+        if (loginDialog.isAuthenticated()) {
+            // 登录成功，显示主界面
+            MainFrame mainFrame = new MainFrame();
+            mainFrame.setVisible(true);
+        } else {
+            System.exit(0);
+        }
+
+        //命令行
+//        StudentManagementSystem studentManagementSystem = new StudentManagementSystem();
+//        studentManagementSystem.run();
     }
-    
+
     /**
      * 运行主程序
      */
@@ -43,19 +53,19 @@ public class StudentManagementSystem {
         System.out.println("=================================================");
         System.out.println("           欢迎使用学生管理系统");
         System.out.println("=================================================");
-        
+
         // 测试数据库连接
         if (!DatabaseConnection.testConnection()) {
             System.out.println("数据库连接失败，请检查数据库配置！");
             return;
         }
-        
+
         boolean running = true;
         while (running) {
             try {
                 showMainMenu();
                 int choice = getIntInput("请选择操作");
-                
+
                 switch (choice) {
                     case 1:
                         addStudent();
@@ -88,7 +98,7 @@ public class StudentManagementSystem {
                     default:
                         System.out.println("无效的选择，请重新输入！");
                 }
-                
+
                 if (running) {
                     System.out.println("\n按回车键继续...");
                     scanner.nextLine();
@@ -99,10 +109,10 @@ public class StudentManagementSystem {
                 scanner.nextLine();
             }
         }
-        
+
         scanner.close();
     }
-    
+
     /**
      * 显示主菜单
      */
@@ -121,44 +131,44 @@ public class StudentManagementSystem {
         System.out.println("0. 退出系统");
         System.out.println("=================================================");
     }
-    
+
     /**
      * 添加学生信息
      */
     private void addStudent() {
         System.out.println("\n==================== 添加学生信息 ====================");
-        
+
         try {
             while (true) {
                 String studentNo = getStringInput("学号 (输入0返回主菜单)");
                 if (studentNo.equals("0")) return;
-                
+
                 String name = getStringInput("姓名 (输入0返回主菜单)");
                 if (name.equals("0")) return;
-                
+
                 String gender = getGenderInput();
                 if (gender.equals("0")) return;
-                
+
                 LocalDate birthDate = getDateInput("出生日期 (格式: yyyy-MM-dd, 输入0返回主菜单)");
                 if (birthDate == null) return; // 用户输入0会返回null
-                
+
                 String major = getStringInput("专业 (输入0返回主菜单)");
                 if (major.equals("0")) return;
-                
+
                 String className = getStringInput("班级 (输入0返回主菜单)");
                 if (className.equals("0")) return;
-                
+
                 String phone = getOptionalStringInput("电话号码 (可选, 输入0返回主菜单)");
                 if (phone != null && phone.equals("0")) return;
-                
+
                 String email = getOptionalStringInput("邮箱 (可选, 输入0返回主菜单)");
                 if (email != null && email.equals("0")) return;
-                
+
                 String address = getOptionalStringInput("地址 (可选, 输入0返回主菜单)");
                 if (address != null && address.equals("0")) return;
-                
+
                 Student student = new Student(studentNo, name, gender, birthDate, major, className, phone, email, address);
-                
+
                 if (studentService.addStudent(student)) {
                     System.out.println("学生信息添加成功！");
                     break;
@@ -170,25 +180,25 @@ public class StudentManagementSystem {
             System.out.println("添加学生信息时发生错误: " + e.getMessage());
         }
     }
-    
+
     /**
      * 删除学生信息
      */
     private void deleteStudent() {
         System.out.println("\n==================== 删除学生信息 ====================");
-        
+
         int id = getIntInput("请输入要删除的学生ID");
-        
+
         // 先查询学生信息
         Student student = studentService.getStudentById(id);
         if (student == null) {
             System.out.println("未找到ID为 " + id + " 的学生信息！");
             return;
         }
-        
+
         // 显示学生信息
         studentService.printStudentInfo(student);
-        
+
         // 确认删除
         String confirm = getStringInput("确认删除该学生信息吗？(y/n)");
         if (confirm.equalsIgnoreCase("y") || confirm.equalsIgnoreCase("yes")) {
@@ -201,29 +211,29 @@ public class StudentManagementSystem {
             System.out.println("取消删除操作。");
         }
     }
-    
+
     /**
      * 修改学生信息
      */
     private void updateStudent() {
         System.out.println("\n==================== 修改学生信息 ====================");
-        
+
         int id = getIntInput("请输入要修改的学生ID");
-        
+
         // 先查询学生信息
         Student student = studentService.getStudentById(id);
         if (student == null) {
             System.out.println("未找到ID为 " + id + " 的学生信息！");
             return;
         }
-        
+
         // 显示当前学生信息
         System.out.println("当前学生信息：");
         studentService.printStudentInfo(student);
-        
+
         try {
             System.out.println("\n请输入新的学生信息（直接回车保持原值）：");
-            
+
             String studentNo = getStringInputWithDefault("学号", student.getStudentNo());
             String name = getStringInputWithDefault("姓名", student.getName());
             String gender = getGenderInputWithDefault(student.getGender());
@@ -233,7 +243,7 @@ public class StudentManagementSystem {
             String phone = getOptionalStringInputWithDefault("电话号码", student.getPhone());
             String email = getOptionalStringInputWithDefault("邮箱", student.getEmail());
             String address = getOptionalStringInputWithDefault("地址", student.getAddress());
-            
+
             // 更新学生信息
             student.setStudentNo(studentNo);
             student.setName(name);
@@ -244,72 +254,72 @@ public class StudentManagementSystem {
             student.setPhone(phone);
             student.setEmail(email);
             student.setAddress(address);
-            
+
             if (studentService.updateStudent(student)) {
                 System.out.println("学生信息修改成功！");
             } else {
                 System.out.println("学生信息修改失败！");
             }
-            
+
         } catch (Exception e) {
             System.out.println("修改学生信息时发生错误: " + e.getMessage());
         }
     }
-    
+
     /**
      * 根据ID查询学生
      */
     private void queryStudentById() {
         System.out.println("\n==================== 根据ID查询学生 ====================");
-        
+
         int id = getIntInput("请输入学生ID");
         Student student = studentService.getStudentById(id);
         studentService.printStudentInfo(student);
     }
-    
+
     /**
      * 根据学号查询学生
      */
     private void queryStudentByStudentNo() {
         System.out.println("\n==================== 根据学号查询学生 ====================");
-        
+
         String studentNo = getStringInput("请输入学号");
         Student student = studentService.getStudentByStudentNo(studentNo);
         studentService.printStudentInfo(student);
     }
-    
+
     /**
      * 根据姓名查询学生
      */
     private void queryStudentsByName() {
         System.out.println("\n==================== 根据姓名查询学生 ====================");
-        
+
         String name = getStringInput("请输入姓名关键字");
         List<Student> students = studentService.getStudentsByName(name);
         studentService.printStudentList(students);
     }
-    
+
     /**
      * 根据专业查询学生
      */
     private void queryStudentsByMajor() {
         System.out.println("\n==================== 根据专业查询学生 ====================");
-        
+
         String major = getStringInput("请输入专业名称");
         List<Student> students = studentService.getStudentsByMajor(major);
         studentService.printStudentList(students);
     }
-    
+
     /**
      * 显示所有学生
      */
     private void showAllStudents() {
         System.out.println("\n==================== 所有学生信息 ====================");
-        
+
         List<Student> students = studentService.getAllStudents();
         studentService.printStudentList(students);
     }
-    
+
     /**
      * 获取字符串输入
      * @param prompt 提示信息
@@ -319,7 +329,7 @@ public class StudentManagementSystem {
         System.out.print(prompt + ": ");
         return scanner.nextLine().trim();
     }
-    
+
     /**
      * 获取可选字符串输入
      * @param prompt 提示信息
@@ -330,7 +340,7 @@ public class StudentManagementSystem {
         String input = scanner.nextLine().trim();
         return input.isEmpty() ? null : input;
     }
-    
+
     /**
      * 获取带默认值的字符串输入
      * @param prompt 提示信息
@@ -342,7 +352,7 @@ public class StudentManagementSystem {
         String input = scanner.nextLine().trim();
         return input.isEmpty() ? defaultValue : input;
     }
-    
+
     /**
      * 获取带默认值的可选字符串输入
      * @param prompt 提示信息
@@ -357,7 +367,7 @@ public class StudentManagementSystem {
         }
         return input.equals("无") ? null : input;
     }
-    
+
     /**
      * 获取整数输入
      * @param prompt 提示信息
@@ -373,7 +383,7 @@ public class StudentManagementSystem {
             }
         }
     }
-    
+
     /**
      * 获取性别输入
      * @return 性别字符串
@@ -387,7 +397,7 @@ public class StudentManagementSystem {
             System.out.println("性别只能输入'男'或'女'！");
         }
     }
-    
+
     /**
      * 获取带默认值的性别输入
      * @param defaultValue 默认值
@@ -406,7 +416,7 @@ public class StudentManagementSystem {
             System.out.println("性别只能输入'男'或'女'！");
         }
     }
-    
+
     /**
      * 获取日期输入
      * @param prompt 提示信息
@@ -423,7 +433,7 @@ public class StudentManagementSystem {
             }
         }
     }
-    
+
     /**
      * 获取带默认值的日期输入
      * @param prompt 提示信息
