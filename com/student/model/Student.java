@@ -3,38 +3,79 @@ package com.student.model;
 import java.time.LocalDate;
 
 /**
- * 学生实体类
- * 用于表示学生的基本信息
+ * 学生实体类 - 核心数据模型
+ * 
+ * 功能:
+ * 1. 映射数据库中的学生表结构
+ * 2. 在DAO层、服务层和UI层之间传输学生数据
+ * 3. 封装学生的所有属性和基本行为
+ * 
+ * 关联关系:
+ * - 被StudentDAO类用于数据库操作
+ * - 被StudentService类用于业务逻辑处理
+ * - 被各种GUI对话框用于界面展示
  */
 public class Student {
-    private int id;              // 学生ID（主键）
-    private String studentNo;    // 学号
-    private String name;         // 姓名
-    private String gender;       // 性别
-    private LocalDate birthDate; // 出生日期
-    private String major;        // 专业
-    private String className;    // 班级
-    private String phone;        // 电话号码
-    private String email;        // 邮箱
-    private String address;      // 地址
+    // 学生ID（数据库主键，自增长字段）
+    // 由数据库自动生成，添加新学生时通常为0
+    private int id;
+    
+    // 学号（唯一标识符，不能重复）
+    // 在注册时由用户输入，用于登录和查询
+    private String studentNo;
+    
+    // 学生姓名
+    private String name;
+    
+    // 性别（通常存储"男"或"女"）
+    private String gender;
+    
+    // 出生日期（使用Java 8的LocalDate类型）
+    // 格式：YYYY-MM-DD
+    private LocalDate birthDate;
+    
+    // 专业（如：计算机科学、电子工程等）
+    private String major;
+    
+    // 班级（如：CS-101）
+    private String className;
+    
+    // 联系电话（11位手机号）
+    private String phone;
+    
+    // 电子邮箱
+    private String email;
+    
+    // 住址
+    private String address;
     
     /**
      * 无参构造函数
+     * 
+     * 使用场景:
+     * 1. 框架反射创建对象时
+     * 2. 需要手动设置属性的情况
+     * 3. 作为DTO传输时的空对象创建
      */
     public Student() {
     }
     
     /**
-     * 带参构造函数
-     * @param studentNo 学号
+     * 全参构造函数（不包含ID）
+     * 
+     * 使用场景:
+     * 1. 创建新学生记录时（ID由数据库自动生成）
+     * 2. 界面输入数据到对象的转换
+     * 
+     * @param studentNo 学号（唯一标识）
      * @param name 姓名
      * @param gender 性别
      * @param birthDate 出生日期
      * @param major 专业
      * @param className 班级
-     * @param phone 电话号码
-     * @param email 邮箱
-     * @param address 地址
+     * @param phone 联系电话
+     * @param email 电子邮箱
+     * @param address 住址
      */
     public Student(String studentNo, String name, String gender, LocalDate birthDate, 
                    String major, String className, String phone, String email, String address) {
@@ -49,7 +90,16 @@ public class Student {
         this.address = address;
     }
     
+    // ======================
     // Getter和Setter方法
+    // ======================
+    
+    /**
+     * 注意：这些方法被以下场景调用
+     * 1. DAO层：从ResultSet中填充对象属性
+     * 2. 服务层：业务逻辑处理中访问属性
+     * 3. GUI层：在界面表格中显示数据
+     */
     
     /**
      * 获取学生ID
@@ -212,8 +262,18 @@ public class Student {
     }
     
     /**
-     * 重写toString方法，用于打印学生信息
-     * @return 学生信息字符串
+     * 重写toString方法
+     * 
+     * 功能:
+     * 1. 提供对象的文本表示形式
+     * 2. 用于日志记录和调试输出
+     * 3. 在控制台应用程序中显示学生信息
+     * 
+     * 调用场景:
+     * - StudentSearchConsole中显示查询结果
+     * - 服务层和DAO层的调试日志
+     * 
+     * @return 格式化的学生信息字符串
      */
     @Override
     public String toString() {

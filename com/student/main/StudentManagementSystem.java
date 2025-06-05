@@ -12,86 +12,123 @@ import java.util.List;
 import java.util.Scanner;
 
 /**
- * 学生管理系统主程序
- * 提供控制台用户界面
+ * 学生管理系统主入口 - 支持GUI和控制台双模式
+ * 
+ * 功能:
+ * 1. 提供基于Swing的图形用户界面(GUI)
+ * 2. 提供基于控制台的命令行界面(CLI)
+ * 3. 两种模式共享相同的业务逻辑层(StudentService)
+ * 
+ * 设计特点:
+ * - GUI模式: 使用LoginDialog进行身份验证，通过后显示MainFrame
+ * - CLI模式: 提供全功能的控制台菜单系统
+ * - 启动时自动测试数据库连接
+ * 
+ * 使用说明:
+ * 1. 默认启动GUI模式
+ * 2. 如需使用CLI模式，注释掉main方法中的GUI代码，取消注释CLI代码
  */
 public class StudentManagementSystem {
+    // 学生服务对象（业务逻辑层）
     private StudentService studentService;
+    
+    // 控制台输入扫描器
     private Scanner scanner;
+    
+    // 日期格式化器（统一日期格式）
     private DateTimeFormatter dateFormatter;
 
     /**
      * 构造函数
+     * 
+     * 初始化:
+     * 1. 创建学生服务实例
+     * 2. 准备控制台输入扫描器
+     * 3. 设置日期格式化器（yyyy-MM-dd）
      */
     public StudentManagementSystem() {
         this.studentService = new StudentService();
         this.scanner = new Scanner(System.in);
-        this.dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        this.dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd"); // ISO标准格式
     }
 
+    /**
+     * 主入口方法
+     * 
+     * 默认启动流程:
+     * 1. 显示登录对话框
+     * 2. 验证用户凭证
+     * 3. 登录成功显示主界面，失败则退出
+     * 
+     * 切换命令行模式:
+     * 注释GUI代码块，取消注释命令行代码块
+     * 
+     * @param args 命令行参数（未使用）
+     */
     public static void main(String[] args) {
-        //gui
+        // ==================== GUI模式 ====================
+        // 创建登录对话框
         LoginDialog loginDialog = new LoginDialog(null);
         loginDialog.setVisible(true);
+        
+        // 验证登录结果
         if (loginDialog.isAuthenticated()) {
             // 登录成功，显示主界面
             MainFrame mainFrame = new MainFrame();
             mainFrame.setVisible(true);
         } else {
+            // 登录失败或取消，退出系统
             System.exit(0);
         }
 
-        //命令行
-//        StudentManagementSystem studentManagementSystem = new StudentManagementSystem();
-//        studentManagementSystem.run();
+        // ==================== 命令行模式 ====================
+        // 如需使用命令行模式，取消注释以下代码并注释上面的GUI代码
+        /*
+        StudentManagementSystem studentManagementSystem = new StudentManagementSystem();
+        studentManagementSystem.run();
+        */
     }
 
     /**
-     * 运行主程序
+     * 运行命令行模式主程序
+     * 
+     * 流程:
+     * 1. 显示欢迎信息
+     * 2. 测试数据库连接
+     * 3. 进入主菜单循环
+     * 4. 根据用户选择执行操作
+     * 5. 提供错误处理和用户友好的提示
      */
     public void run() {
         System.out.println("=================================================");
-        System.out.println("           欢迎使用学生管理系统");
+        System.out.println("           欢迎使用学生管理系统（命令行版）");
         System.out.println("=================================================");
 
-        // 测试数据库连接
+        // 测试数据库连接（系统启动必要检查）
         if (!DatabaseConnection.testConnection()) {
             System.out.println("数据库连接失败，请检查数据库配置！");
+            System.out.println("1. 确保MySQL服务已启动");
+            System.out.println("2. 检查config.properties中的连接参数");
             return;
         }
 
         boolean running = true;
         while (running) {
             try {
-                showMainMenu();
+                showMainMenu(); // 显示主菜单
                 int choice = getIntInput("请选择操作");
 
+                // 根据用户选择调用相应功能
                 switch (choice) {
-                    case 1:
-                        addStudent();
-                        break;
-                    case 2:
-                        deleteStudent();
-                        break;
-                    case 3:
-                        updateStudent();
-                        break;
-                    case 4:
-                        queryStudentById();
-                        break;
-                    case 5:
-                        queryStudentByStudentNo();
-                        break;
-                    case 6:
-                        queryStudentsByName();
-                        break;
-                    case 7:
-                        queryStudentsByMajor();
-                        break;
-                    case 8:
-                        showAllStudents();
-                        break;
-                    case 0:
+                    case 1: addStudent(); break;          // 添加学生
+                    case 2: deleteStudent(); break;       // 删除学生
+                    case 3: updateStudent(); break;       // 更新学生
+                    case 4: queryStudentById(); break;    // ID查询
+                    case 5: queryStudentByStudentNo(); break; // 学号查询
+                    case 6: queryStudentsByName(); break; // 姓名查询
+                    case 7: queryStudentsByMajor(); break; // 专业查询
+                    case 8: showAllStudents(); break;     // 显示所有学生
+                    case 0:                               // 退出系统
                         running = false;
                         System.out.println("感谢使用学生管理系统，再见！");
                         break;
@@ -99,22 +136,29 @@ public class StudentManagementSystem {
                         System.out.println("无效的选择，请重新输入！");
                 }
 
+                // 每次操作后暂停，让用户看到结果
                 if (running) {
                     System.out.println("\n按回车键继续...");
-                    scanner.nextLine();
+                    scanner.nextLine(); // 等待用户确认
                 }
             } catch (Exception e) {
+                // 异常处理：显示错误并返回主菜单
                 System.out.println("发生错误: " + e.getMessage());
                 System.out.println("按回车键返回主菜单...");
                 scanner.nextLine();
             }
         }
 
-        scanner.close();
+        scanner.close(); // 关闭扫描器释放资源
     }
 
     /**
-     * 显示主菜单
+     * 显示控制台主菜单
+     * 
+     * 菜单设计:
+     * - 清晰的功能分区
+     * - 简洁的选项编号
+     * - 提供退出选项
      */
     private void showMainMenu() {
         System.out.println("\n=================================================");
@@ -133,13 +177,25 @@ public class StudentManagementSystem {
     }
 
     /**
-     * 添加学生信息
+     * 添加学生流程
+     * 
+     * 流程:
+     * 1. 显示添加学生标题
+     * 2. 循环收集学生信息（可中途取消）
+     * 3. 验证并提交到服务层
+     * 4. 显示操作结果
+     * 
+     * 设计特点:
+     * - 每个字段提供取消选项（输入0返回）
+     * - 可选字段可以留空
+     * - 实时反馈验证结果
      */
     private void addStudent() {
         System.out.println("\n==================== 添加学生信息 ====================");
 
         try {
             while (true) {
+                // 逐步获取学生信息（每个步骤都可取消）
                 String studentNo = getStringInput("学号 (输入0返回主菜单)");
                 if (studentNo.equals("0")) return;
 
@@ -167,13 +223,16 @@ public class StudentManagementSystem {
                 String address = getOptionalStringInput("地址 (可选, 输入0返回主菜单)");
                 if (address != null && address.equals("0")) return;
 
+                // 创建学生对象
                 Student student = new Student(studentNo, name, gender, birthDate, major, className, phone, email, address);
 
+                // 调用服务层添加学生
                 if (studentService.addStudent(student)) {
                     System.out.println("学生信息添加成功！");
-                    break;
+                    break; // 添加成功退出循环
                 } else {
                     System.out.println("学生信息添加失败，请检查输入！");
+                    // 失败时继续循环，允许用户重新输入
                 }
             }
         } catch (Exception e) {

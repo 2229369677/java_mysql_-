@@ -7,7 +7,6 @@ import java.awt.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.time.format.DateTimeParseException;
 
 public class AddStudentDialog extends JDialog {
     private StudentService studentService;
@@ -37,7 +36,6 @@ public class AddStudentDialog extends JDialog {
     private void initUI() {
         JPanel panel = new JPanel(new GridLayout(10, 2, 5, 5));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        
         // 学号
         panel.add(new JLabel("学号:"));
         studentNoField = new JTextField();
