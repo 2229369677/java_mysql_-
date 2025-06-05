@@ -96,6 +96,15 @@ public class MainFrame extends JFrame {
         JButton addButton = new JButton("添加学生");
         JButton deleteButton = new JButton("删除学生");
         JButton refreshButton = new JButton("刷新");
+        /**
+         * 添加查找按钮
+         * */
+        JButton searchButton1 = new JButton("查找学生");
+        buttonPanel.add(searchButton1);
+        searchButton1.addActionListener(e -> {
+            SearchDialog searchDialog = new SearchDialog(this);
+            searchDialog.setVisible(true);
+        });
 
         // 添加学生按钮：点击打开添加学生对话框
         addButton.addActionListener(e -> showAddStudentDialog());

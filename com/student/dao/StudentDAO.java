@@ -77,7 +77,6 @@ public class StudentDAO {
         } catch (SQLException e) {
             // 捕获并记录具体错误
             System.err.println("添加学生信息时发生错误: " + e.getMessage());
-            // 实际项目应使用日志框架记录完整堆栈
         }
         
         return false;
@@ -359,6 +358,7 @@ public class StudentDAO {
         return student;
     }
 
+    // 根据ID查询学生信息
     public Student getStudentById(int id) {
         String sql = "SELECT * FROM students WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
